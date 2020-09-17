@@ -163,8 +163,8 @@ def price_checker():
             data = data.split(' ')
             data2 = data2.split(' ')
             for u in data:
-                if u == '' or u == 'None':
-                    pass
+                if u == '':
+                    data2.remove(str(u))
                 else:
                     if cu_price > float(u):
                         data2.remove(str(u))
@@ -184,8 +184,8 @@ def price_checker():
             data = data.split(' ')
             data2 = data2.split(' ')
             for u in data:
-                if u == '' or u == 'None':
-                    pass
+                if u == '':
+                    data2.remove(str(u))
                 else:
                     if cu_price < float(u):
                         data2.remove(str(u))
