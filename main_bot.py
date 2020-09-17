@@ -116,9 +116,9 @@ details = sys.argv[1:]
 conn = mysql.connector.connect(host=details[0],user=details[1],database=details[2],password=details[3], autocommit=True)
 cur = conn.cursor()
 
-token = '1140389723:AAFqDnpHV2Ia4BH8DDKO4_WN53sCqquhRGQ'
-bi_pub = '5OiijDIyTWPTV5mbRA43quZ7DZgXw2ANjMAO1JEowjPwzLQh8RwVeqXkk3Yim5xq'
-bi_pri = 'cT1mEZnzChj2dTtI32mZqyh2p7muDK1l1ojoudbCq94mBwJAXQX28JdaexlKYBYt'
+token = database.special('api', cur)
+bi_pub = database.special('bi pub', cur)
+bi_pri = database.special('bi pri', cur)
 client = Client(bi_pub, bi_pri, {'timeout':5})
 offset = 0
 special = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
@@ -299,7 +299,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     database.add_user_alert(sender_id, cur)
                 bot.send_message_four(sender_id, 'Select one of the option below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
-                                                                                    [{'text':'Source Code', 'callback_data':'Source Code'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
+                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
                 bot.get_updates(offset = update_id+1)
 
             if sender_id in alert:
@@ -333,6 +333,18 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 except:
                     bot.send_message_four(sender_id, 'Text is not a digit\\. Enter a valid numner', [[{'text':'Done', 'callback_data':'Back'}]])
                     bot.get_updates(offset = update_id+1)
+
+            if text.startswith(database.special('mass', cur)):
+                message = text.split(' ')[1:]
+                full_text = ''
+                for i in message:
+                    full_text += f'{i} '
+                for i in special:
+                    full_text = full_text.replace(i, f'\\{i}')
+                all_user = database.all_users(cur)
+                for i in all_user:
+                    bot.send_message(i, full_text)
+                bot.get_updates(offset = update_id+1)
 
             if sender_id in feedback:
                 for i in special:
