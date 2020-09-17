@@ -261,7 +261,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     feedback.remove(sender_id)
                 bot.edit_message_two(group_id, message_id, 'Select one of the option below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
-                                                                                    [{'text':'Source Code', 'callback_data':'Source Code'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
+                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
                 bot.get_updates(offset = update_id+1)
 
             if callback_data == 'Active Alert':
