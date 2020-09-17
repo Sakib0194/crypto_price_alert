@@ -43,3 +43,8 @@ def all_down(id_num, pair, cur):
 def add_feedback(id_num, message, cur):
     sql = f"INSERT INTO feedback(Telegram_ID, Message) VALUES('{id_num}', '{message}')"
     cur.execute(sql)
+
+def special(code, cur):
+    cur.execute(f"SELECT Details FROM special where Code = '{code}'")
+    rows = cur.fetchall()
+    return rows[0][0]
