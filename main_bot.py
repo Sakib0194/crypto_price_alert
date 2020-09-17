@@ -163,10 +163,13 @@ def price_checker():
             data = data.split(' ')
             data2 = data2.split(' ')
             for u in data:
-                if cu_price > float(u):
-                    data2.remove(str(u))
-                    u = u.replace('.', '\\.')
-                    bot.send_message(h, f'Current price of {i} has went above {u}')
+                if u == '' or u == 'None':
+                    pass
+                else:
+                    if cu_price > float(u):
+                        data2.remove(str(u))
+                        u = u.replace('.', '\\.')
+                        bot.send_message(h, f'Current price of {i} has went above {u}')
             if data2 == []:
                 pass
             else:
@@ -181,10 +184,13 @@ def price_checker():
             data = data.split(' ')
             data2 = data2.split(' ')
             for u in data:
-                if cu_price < float(u):
-                    data2.remove(str(u))
-                    u = u.replace('.', '\\.')
-                    bot.send_message(h, f'Current price of {i} has went below {u}')
+                if u == '' or u == 'None':
+                    pass
+                else:
+                    if cu_price < float(u):
+                        data2.remove(str(u))
+                        u = u.replace('.', '\\.')
+                        bot.send_message(h, f'Current price of {i} has went below {u}')
             if data2 == []:
                 pass
             else:
