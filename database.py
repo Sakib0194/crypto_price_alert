@@ -48,3 +48,9 @@ def special(code, cur):
     cur.execute(f"SELECT Details FROM special where Code = '{code}'")
     rows = cur.fetchall()
     return rows[0][0]
+
+def available_pairs(code, cur):
+    cur.execute(f"SELECT Details FROM special where Code = '{code}'")
+    rows = cur.fetchall()
+    rows = rows[0][0].split(' ')
+    return rows

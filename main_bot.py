@@ -116,13 +116,14 @@ details = sys.argv[1:]
 conn = mysql.connector.connect(host=details[0],user=details[1],database=details[2],password=details[3], autocommit=True)
 cur = conn.cursor()
 
-token = database.special('api', cur)
+token = '1140389723:AAFqDnpHV2Ia4BH8DDKO4_WN53sCqquhRGQ'
 bi_pub = database.special('bi pub', cur)
 bi_pri = database.special('bi pri', cur)
 client = Client(bi_pub, bi_pri, {'timeout':5})
 offset = 0
 special = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-pairs = ['BTCUSDT', 'ETHUSDT']
+pairs = database.available_pairs('pairs', cur)
+for_price = database.available_pairs('price', cur)
 feedback = []
 alert = {}
 
@@ -265,9 +266,10 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     del alert[sender_id]
                 if sender_id in feedback:
                     feedback.remove(sender_id)
-                bot.edit_message_two(group_id, message_id, 'Select one of the option below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
+                bot.edit_message_two(group_id, message_id, 'Select one of the options below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
-                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
+                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}],
+                                                                                    [{'text':'Price Checker', 'callback_data':'Price Checker'}]])
                 bot.get_updates(offset = update_id+1)
 
             if callback_data == 'Active Alert':
@@ -290,6 +292,15 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 bot.edit_message_two(group_id, message_id, 'You can report any bugs, feedback, request features from here\\.\nType your text now, it will be recorded', [[{'text':'Back','callback_data':'Back'}]])
                 bot.get_updates(offset = update_id+1)
 
+            if callback_data == 'Price Checker':
+                full_text = ''
+                for i in for_price:
+                    cu_price = price(i)
+                    cu_price = str(cu_price).replace('.', '\\.')
+                    full_text += f'*{i}*    {cu_price}\n'
+                bot.send_message(sender_id, full_text)
+                bot.get_updates(offset = update_id+1)
+
         else:   
             text = current_updates['message']['text']
             print(text)
@@ -303,9 +314,10 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 if sender_id not in users:
                     database.add_users(sender_id, cur)
                     database.add_user_alert(sender_id, cur)
-                bot.send_message_four(sender_id, 'Select one of the option below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
+                bot.send_message_four(sender_id, 'Select one of the options below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
-                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}]])
+                                                                                    [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}],
+                                                                                    [{'text':'Price Checker', 'callback_data':'Price Checker'}]])
                 bot.get_updates(offset = update_id+1)
 
             if sender_id in alert:
