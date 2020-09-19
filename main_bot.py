@@ -289,7 +289,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
 
             if callback_data == 'Feedback':
                 feedback.append(sender_id)
-                bot.edit_message_two(group_id, message_id, 'You can report any bugs, feedback, request features from here\\.\nType your text now, it will be recorded', [[{'text':'Back','callback_data':'Back'}]])
+                bot.edit_message_two(group_id, message_id, 'You can report any bugs, feedback, request features from here\\.\nType your text now, it will be recorded\nTo contact me directly [click here](https://t.me/sakib0194)', [[{'text':'Back','callback_data':'Back'}]])
                 bot.get_updates(offset = update_id+1)
 
             if callback_data == 'Price Checker':
@@ -298,6 +298,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     cu_price = price(i)
                     cu_price = str(cu_price).replace('.', '\\.')
                     full_text += f'*{i}*    {cu_price}\n'
+                full_text += '\nAll Binance Pairs price can now be checked via the command below\nprice PairNames\nprice BNBBTC\nprice BTCUSDT BNBUSDT etc'
                 bot.send_message(sender_id, full_text)
                 bot.get_updates(offset = update_id+1)
 
@@ -371,6 +372,22 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 database.add_feedback(sender_id, text, cur)
                 bot.send_message_four(sender_id, 'Your feedback has been successfully recorded', [[{'text':'Done', 'callback_data':'Back'}]])
                 bot.get_updates(offset = update_id+1)
+
+            if text.startswith('price'):
+                try:
+                    message = text.split(' ')[1:]
+                    full_text = ''
+                    for i in message:
+                        coin_price = price(i)
+                        coin_price = '%.10f'%coin_price
+                        coin_price = str(coin_price).replace('.', '\\.')
+                        full_text += f'*{i}*     {coin_price}\n'
+                    bot.send_message(sender_id, full_text)
+                    bot.get_updates(offset = update_id+1)
+                except:
+                    bot.send_message(sender_id, 'Invalid Pairs')
+                    bot.get_updates(offset = update_id+1)
+                
 
     except Exception as e:
         print(e)
