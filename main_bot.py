@@ -122,7 +122,6 @@ bi_pri = database.special('bi pri', cur)
 client = Client(bi_pub, bi_pri, {'timeout':5})
 offset = 0
 special = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-pairs = database.available_pairs('pairs', cur)
 for_price = database.available_pairs('price', cur)
 feedback = []
 alert = {}
@@ -180,6 +179,7 @@ def price_checker():
             database.add_up(h, i, full_text, cur)
         for h in alert_down:
             full_text = ''
+            cu_price = price(i)
             data = alert_down[h]
             data2 = alert_down[h]
             data = data.split(' ')
@@ -201,7 +201,7 @@ def price_checker():
             database.add_down(h, i, full_text, cur)
 
 def starter():
-    global offset, conn, cur
+    global offset, conn, cur, pairs
     while True:
         try:
             if conn.is_connected() == True:
@@ -209,6 +209,7 @@ def starter():
             else:
                 conn = mysql.connector.connect(host=details[0],user=details[1],database=details[2],password=details[3], autocommit=True)
                 cur = conn.cursor()
+            pairs = database.available_pairs('pairs', cur)
             price_checker()
             all_updates = bot.get_updates(offset)
             for current_updates in all_updates:
@@ -240,9 +241,10 @@ def starter():
             pass
 
 def bot_message_handler(current_updates, update_id, message_id, sender_id, group_id, dict_checker, cur, callback_data=0, callback=False):
+    global pairs
     try:
         if callback == True:
-            print(callback_data)
+            print(callback_data, sender_id, time.time())
             
             if callback_data == 'New Alert':
                 full_code = []
@@ -266,7 +268,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     del alert[sender_id]
                 if sender_id in feedback:
                     feedback.remove(sender_id)
-                bot.edit_message_two(group_id, message_id, 'Select one of the options below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
+                bot.edit_message_two(group_id, message_id, 'Select one of the options below\nSend /start to go back to the main menu', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
                                                                                     [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}],
                                                                                     [{'text':'Price Checker', 'callback_data':'Price Checker'}]])
@@ -298,13 +300,13 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                     cu_price = price(i)
                     cu_price = str(cu_price).replace('.', '\\.')
                     full_text += f'*{i}*    {cu_price}\n'
-                full_text += '\nAll Binance Pairs price can now be checked via the command below\nprice PairNames\nprice BNBBTC\nprice BTCUSDT BNBUSDT etc'
+                full_text += '\nAll Binance Pairs price can now be checked via the command below\n*price PairNames*\nexample command\nprice BNBBTC\nprice BTCUSDT BNBUSDT etc'
                 bot.send_message(sender_id, full_text)
                 bot.get_updates(offset = update_id+1)
 
         else:   
             text = current_updates['message']['text']
-            print(text)
+            print(text, sender_id, time.time())
 
             if text == '/start':
                 if sender_id in feedback:
@@ -315,7 +317,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 if sender_id not in users:
                     database.add_users(sender_id, cur)
                     database.add_user_alert(sender_id, cur)
-                bot.send_message_four(sender_id, 'Select one of the options below', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
+                bot.send_message_four(sender_id, 'Select one of the options below\nSend /start to go back to the main menu', [[{'text':'Active Alerts', 'callback_data':'Active Alert'}],
                                                                                     [{'text':'Create New Alert', 'callback_data':'New Alert'}],
                                                                                     [{'text':'Source Code', 'url':'https://github.com/Sakib0194/crypto_price_alert/'}, {'text':'Send Feedback', 'callback_data':'Feedback'}],
                                                                                     [{'text':'Price Checker', 'callback_data':'Price Checker'}]])
@@ -373,7 +375,7 @@ def bot_message_handler(current_updates, update_id, message_id, sender_id, group
                 bot.send_message_four(sender_id, 'Your feedback has been successfully recorded', [[{'text':'Done', 'callback_data':'Back'}]])
                 bot.get_updates(offset = update_id+1)
 
-            if text.startswith('price'):
+            if text.startswith('price') or text.startswith('/price') or text.startswith('Price') or text.startswith('/Price'):
                 try:
                     message = text.split(' ')[1:]
                     full_text = ''
